@@ -29,9 +29,46 @@ func (p Part) String() string {
 	return fmt.Sprintf("<<编号：%d, 姓名：%q>>", p.Id, p.Name)
 }
 
+// Exchanger 接口练习.
+type Exchanger interface {
+	Exchange()
+}
+
+// StringPair 字符串对.
+type StringPair struct {
+	first, second string
+}
+
+// Exchange 实现了Exchanger接口.
+func (sp *StringPair) Exchange() {
+	sp.first, sp.second = sp.second, sp.first
+}
+
+func (sp StringPair) String() string {
+	return fmt.Sprintf("%q + %q", sp.first, sp.second)
+}
+
+// Point 基本类型自定义.
+type Point [2]int
+
+// Exchange 实现了Exchanger接口.
+func (p *Point) Exchange() {
+	p[0], p[1] = p[1], p[0]
+}
+
 func main() {
 	p := Part{1, "林秀全"}
 	fmt.Println(p)
 	p.Lower()
-	fmt.Printf("%s", p) // 这里会直接调用Part.String()方法转化
+	fmt.Printf("%s\n", p) // 这里会直接调用Part.String()方法转化
+
+	sp := StringPair{"weetgo", "COM"}
+	pt := Point{123, 321}
+	fmt.Println(sp)
+	fmt.Println(pt)
+	sp.Exchange()
+	pt.Exchange()
+	fmt.Println(sp)
+	fmt.Println(pt)
+
 }
