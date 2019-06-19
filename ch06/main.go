@@ -8,6 +8,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"strings"
 )
 
@@ -44,8 +45,39 @@ func (sp *StringPair) Exchange() {
 	sp.first, sp.second = sp.second, sp.first
 }
 
+// String 实现了fmt.Stringer接口
 func (sp StringPair) String() string {
 	return fmt.Sprintf("%q + %q", sp.first, sp.second)
+}
+
+// Read 实现io.Reader接口.
+// 把StringPair读取到data中并删除原来内存，返回已读取的字节数和错误。
+func (sp *StringPair) Read(data []byte) (n int, err error) {
+	if sp.first == "" && sp.second == "" {
+		return 0, io.EOF
+	}
+	if sp.first != "" {
+		n = copy(data, sp.first)
+		sp.first = sp.first[n:]
+	}
+	if sp.second != "" && n < len(data) {
+		m := copy(data[n:], sp.second)
+		sp.second = sp.second[m:]
+		n += m
+	}
+
+	return n, err
+}
+
+// 读取size个字节.
+// 不关注r的具体类型，只需要满足接口即可.
+func toBytes(r io.Reader, size int) ([]byte, error) {
+	data := make([]byte, size)
+	n, err := r.Read(data)
+	if nil != err {
+		return data, err
+	}
+	return data[:n], nil // 清除无用字节.
 }
 
 // Point 基本类型自定义.
@@ -80,4 +112,15 @@ func main() {
 	exchage(&sp, &pt) // 这里不能传值，必须传指针.
 	fmt.Println(sp)
 	fmt.Println(pt)
+
+	const size = 16
+	tj := &StringPair{"Tom", "Jerry"}
+	md := StringPair{"Mouse", "Duck"}
+	for _, r := range []io.Reader{tj, &md} {
+		data, err := toBytes(r, size)
+		if nil != err {
+			fmt.Println(err)
+		}
+		fmt.Printf("%q\n", data)
+	}
 }
