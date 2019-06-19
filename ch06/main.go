@@ -56,6 +56,13 @@ func (p *Point) Exchange() {
 	p[0], p[1] = p[1], p[0]
 }
 
+// 展示了接口的鸭子类型.
+func exchage(ex ...Exchanger) {
+	for _, e := range ex {
+		e.Exchange()
+	}
+}
+
 func main() {
 	p := Part{1, "林秀全"}
 	fmt.Println(p)
@@ -70,5 +77,7 @@ func main() {
 	pt.Exchange()
 	fmt.Println(sp)
 	fmt.Println(pt)
-
+	exchage(&sp, &pt) // 这里不能传值，必须传指针.
+	fmt.Println(sp)
+	fmt.Println(pt)
 }
